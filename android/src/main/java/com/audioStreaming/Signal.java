@@ -107,7 +107,7 @@ public class Signal extends Service implements ExoPlayer.EventListener, Metadata
         this.clsActivity = module.getClassActivity();
         this.module = module;
         
-        this.eventsReceiver = new EventsReceiver(this.module);
+        this.eventsReceiver = new EventsReceiver(this.module, this);
         
         registerReceiver(this.eventsReceiver, new IntentFilter(Mode.CREATED));
         registerReceiver(this.eventsReceiver, new IntentFilter(Mode.IDLE));
@@ -143,17 +143,16 @@ public class Signal extends Service implements ExoPlayer.EventListener, Metadata
 
         switch (playbackState) {
             case ExoPlayer.STATE_IDLE:
-                sendBroadcast(new Intent(Mode.IDLE));
+                sendBroadcast(new Intent(Mode.STOPPED));
                 break;
             case ExoPlayer.STATE_BUFFERING:
-
-                sendBroadcast(new Intent(Mode.BUFFERING_START));
+                sendBroadcast(new Intent(Mode.BUFFERING));
                 break;
             case ExoPlayer.STATE_READY:
                 if (this.player != null && this.player.getPlayWhenReady()) {
                     sendBroadcast(new Intent(Mode.PLAYING));
                 } else {
-                    sendBroadcast(new Intent(Mode.READY));
+                    sendBroadcast(new Intent(Mode.PAUSED));
                 }
                 break;
             case ExoPlayer.STATE_ENDED:
@@ -242,7 +241,7 @@ public class Signal extends Service implements ExoPlayer.EventListener, Metadata
     public void pause() {
         Assertions.assertNotNull(player);
         player.setPlayWhenReady(false);
-        sendBroadcast(new Intent(Mode.STOPPED));
+        sendBroadcast(new Intent(Mode.PAUSED));
     }
     
     public void resume() {
@@ -344,7 +343,7 @@ public class Signal extends Service implements ExoPlayer.EventListener, Metadata
         }
         Resources res = context.getResources();
         String packageName = context.getPackageName();
-        int smallIconResId = res.getIdentifier("ic_notification", "mipmap", packageName);
+        int smallIconResId = res.getIdentifier("ic_launcher", "mipmap", packageName);
         int largeIconResId = res.getIdentifier("ic_launcher", "mipmap", packageName);
         Bitmap largeIconBitmap = BitmapFactory.decodeResource(res, largeIconResId);
         remoteViews = new RemoteViews(packageName, R.layout.streaming_notification_player);
@@ -386,7 +385,9 @@ public class Signal extends Service implements ExoPlayer.EventListener, Metadata
     }
     
     public void exitNotification() {
-        notifyManager.cancelAll();
+        if (notifyManager != null) {
+            notifyManager.cancelAll();
+        }      
         clearNotification();
         notifyBuilder = null;
         notifyManager = null;

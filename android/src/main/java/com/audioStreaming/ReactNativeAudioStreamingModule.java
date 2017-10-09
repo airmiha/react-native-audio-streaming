@@ -93,7 +93,7 @@ public class ReactNativeAudioStreamingModule extends ReactContextBaseJavaModule
     
   private void playInternal(String streamingURL) {
     signal.play(streamingURL);
-        
+
     if (shouldShowNotification) {
       signal.showNotification();
     }
@@ -104,8 +104,7 @@ public class ReactNativeAudioStreamingModule extends ReactContextBaseJavaModule
   }
     
   @ReactMethod public void pause() {
-    // Not implemented on aac
-    this.stop();
+    signal.pause();
   }
     
   @ReactMethod public void resume() {
