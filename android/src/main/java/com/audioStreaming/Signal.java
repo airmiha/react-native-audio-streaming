@@ -356,24 +356,21 @@ public class Signal extends Service implements ExoPlayer.EventListener, Metadata
         .setOngoing(true)
         ;
         
-        Intent resultIntent = new Intent(this.context, this.clsActivity);
-        resultIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent notificationIntent = new Intent(this.context, this.clsActivity);
+
+        notificationIntent.setAction(Intent.ACTION_MAIN);
+        notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this.context);
-        stackBuilder.addParentStack(this.clsActivity);
-        stackBuilder.addNextIntent(resultIntent);
-        
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
-                                                                          PendingIntent.FLAG_UPDATE_CURRENT);
-        
-        notifyBuilder.setContentIntent(resultPendingIntent);
+        notifyBuilder.setContentIntent(pendingIntent);
         
         remoteViews.setTextViewText(R.id.title, this.getAppTitle());
         remoteViews.setTextViewText(R.id.subtitle, "Playing an audio file");
         remoteViews.setImageViewResource(R.id.streaming_icon, largeIconResId);
-        remoteViews.setOnClickPendingIntent(R.id.btn_streaming_notification_play, makePendingIntent(BROADCAST_PLAYBACK_PLAY));
-        remoteViews.setOnClickPendingIntent(R.id.btn_streaming_notification_stop, makePendingIntent(BROADCAST_EXIT));
+       // remoteViews.setOnClickPendingIntent(R.id.btn_streaming_notification_play, makePendingIntent(BROADCAST_PLAYBACK_PLAY));
+        // remoteViews.setOnClickPendingIntent(R.id.btn_streaming_notification_stop, makePendingIntent(BROADCAST_EXIT));
         notifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notifyManager.notify(NOTIFY_ME_ID, notifyBuilder.build());
     }
